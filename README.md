@@ -5,13 +5,19 @@ You can make pull requests to suggest new drinks and foods to add to the alias. 
 
 The current items are as follows. 
 
+
 Drinks
 
 Beer           | 6 Copper  | +1 Intoxication
+
 Ale            | 4 Copper  | +1 Intoxication
+
 Wine           | 8 Copper  | +1 Intoxication
+
 Elvish Wine    | 8 Silver  | +3 Intoxication
+
 Whiskey        | 8 Silver  | +3 Intoxication
+
 Dwarvish Spirit| 15 Gold   | +4 Intoxication
 
 
@@ -19,5 +25,8 @@ Dwarvish Spirit| 15 Gold   | +4 Intoxication
 Foods
 
 Soup           | 5 Copper  | -1 Intoxication 
+
 Bread          | 2 Copper  | -2 Intoxication
+
 Hearty Meal    | 2 Silver  | -4 Intoxication 
+
