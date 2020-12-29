@@ -1,7 +1,7 @@
 # Drinking-Eating-and-Intoxication
 This is as repository for mine (Adalbär#3333) and Madmatt22790#1708 Drinking, Eating and Intoxication Avrae Alias.
 
-You can make pull requests to suggest new drinks and foods to add to the alias. When you make a pull request, please leave the following: Item Name, Drink or Food, Cost, Intoxication Modifier, a simple 1-2 sentence description, and if you want to be notified that the new item as been added please add you discord username. 
+You can make issue requests to suggest new drinks and foods to add to the alias. When you make a pull request, please leave the following: Item Name, Drink or Food, Cost, Intoxication Modifier, a simple 1-2 sentence description, and if you want to be notified that the new item as been added please add you discord username. 
 
 The current items are as follows. 
 
