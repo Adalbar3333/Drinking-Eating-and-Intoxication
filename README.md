@@ -5,6 +5,8 @@ You can make issue requests to suggest new drinks and foods to add to the alias.
 
 The current items are as follows. 
 
+You can see all added content in the Added-Content Branch
+
 
 Drinks
 
