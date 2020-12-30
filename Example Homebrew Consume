@@ -1,0 +1,21 @@
+# Homebrew Consume Example
+
+!svar hbConsume
+[{
+# `fancyName` will present what you put in for it, so this will present "Example Drink" as it's name. 
+"fancyName":"Example Drink",
+
+# `name` sets up the command, so this drink will be called via `!consume hb example-drink`
+"name":"example-drink",
+
+# `cost` sets up the ammount of coins it will take out. 
+"cost":"8",
+
+# `coinType` sets the type of coin, and will take out `cost` amount of that type of coin. It must be in cp (Copper Pieces), sp (Silver Pieces), ep (Electurm Pieces), gp (Gold Pieces), or pp (Platnium Pieces) form
+"coinType":"cp"
+
+# `intox` sets the Intoxication Modifire for the item. 
+"intox":"+1",
+"desc":"This beer is only fancy because it's in glass cup instead of wooden cup."
+
+},{another item set up like above.}]
