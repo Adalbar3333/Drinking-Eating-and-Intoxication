@@ -1,0 +1,63 @@
+embed -title "<name> drinks a bowl of soup!"
+
+# Sets cost of the soup to 5 copper
+{{costs=5}}
+
+# Removes the indicated coin above from the bag only if there is enough coin to do so
+{{bagsLoaded=load_json(bags)}}
+{{coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],"cp"}}
+{{coins in bagsLoaded or bagsLoaded.append(coins)}}
+{{coinsOk=True if coins[1][ct]>=costs else False}}
+{{coins[1].update({ct:coins[1][ct]-costs} if coinsOk else "")}}
+{{set_cvar("bags",dump_json(bagsLoaded)) if coinsOk else ""}}
+
+# Stores the arguments for later parsing, sets the name of the two CC and collects the constitutionMod
+{{ar,cc,cf,con,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",constitutionMod,character()}}
+
+# Error Checking
+{{helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False}}
+{{resetOk=True if ar.get("reset") or ar.get("Reset") else False}}
+
+# Create the CC if they didn't exist
+{{ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)}}
+
+# Reset drinks if reset is sent
+{{ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""}}
+
+# Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
+{{"" if helpOk or resetOk or coinsOk==False else ch.mod_cc(cc,-1)}}
+
+# Sets the value of how many drinks until it starts to make the saves
+{{x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con}}
+
+# Sets the incremental DC which is based off the amount of drinks taken minus their constitution modifier
+{{dc=10+((y*2)-2)}}
+
+# Checks if advantage, disadvantage, guidance or a bonus was added to the roll and applies appropriate dice string
+{{d=vroll(f"""{["1d20", "2d20kh1", "2d20kl1"][ar.adv()]}+{str(constitutionSave)}{f"+{ar.join('b', '+')}" if ar.get("b") else ""}{"+1d4" if ar.get("guidance") else ""}""")}}
+
+# Increase drunkeness if DC is not met.
+{{dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0}}
+{{ch.mod_cc(cf,+dr) if coinsOk else ""}}
+
+# String to display based on whether they are making saves or not
+{{p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)}}
+
+# Clean up the coins bag to display
+{{coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")}}
+
+-desc "This simple soup is made from carrots, potatoes and bone broth. 
+
+{{'You do not have enough copper pieces to purchase a bowl of soup, come back when you have some more or convert some higher denomination coins to silver and try the command again.\n\n' if coinsOk==False else ''}}**Coins**
+{{coinsDisp}}
+___
+**Intoxication Points:** {{ch.get_cc(cc)}}
+**Drunkeness Points:** {{ch.cc_str(cf)}}
+{{p}}
+"
+{{f'-f "{name} is Tipsy:| {name} gains advantage on all Charisma Checks, but disadvantage on all Intelligence checks. "' if ch.get_cc(cf)==1 else f'-f "{name} is drunk:| {name} is under the same effects as tipsy, but they now have advantage on all Strength checks but disadvantage on all Dexterity checks."' if ch.get_cc(cf)==2 else f'-f "{name} has Alcohol Poisioning:| {name} has disadvantage on all attack rolls and ability checks"' if ch.get_cc(cf)==3 else f'-f "{name} has Heavy Alcohol Poisioning:| {name} is still under the effect of Alcohol Poisioning, but their speed is now halved."' if ch.get_cc(cf)==4 else f'-f "{name} has blacked out drunk: | {name} is now incapacitated."' if ch.get_cc(cf)==5 else ""}}
+{{'-f "To take a drink type !drink "Alcohol". to reset your drinking counter type !drink reset to view this help type !drink help. This alias supports **adv, dis, -b,** and **guidance**."' if helpOk else ""}}
+-color <color>
+-thumb <image>
+-footer "!drink | by @Madmatt22790 and @Adalbär"
+-thumb https://cdn.discordapp.com/attachments/792699041502593025/793347046333218876/beers.png
