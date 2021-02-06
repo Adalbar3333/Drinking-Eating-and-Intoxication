@@ -35,5 +35,6 @@ You are now Incapacitated.
 Drink Responsibly!"
 -color <color>
 -thumb <image>
--footer "!drink | by @Madmatt22790#1708 and @Adalbär#3333"
+-f "Automatic Coin Exchange is now supported!"
+-footer "!drink | by @Adalbär#3333"
 -thumb https://cdn.discordapp.com/attachments/792699041502593025/793347046333218876/beers.png
