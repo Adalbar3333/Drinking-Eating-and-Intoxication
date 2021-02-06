@@ -63,7 +63,7 @@ error=[x for x in pouch[1]if pouch[1][x]<0]
 
 # Increase drunkeness if DC is not met.
 {{dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0}}
-{{ch.mod_cc(cf,+dr) if coinsOk else ""}}
+{{ch.mod_cc(cf,+dr)}}
 
 # String to display based on whether they are making saves or not
 {{p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)}}
@@ -73,7 +73,7 @@ error=[x for x in pouch[1]if pouch[1][x]<0]
 
 -desc "This beer is frothy, and put into a simple wooden or tin tankard. The foam falls over the side, and it gives of a nice armoa.
 
-{{'You did not have enough coin to buy this item, so we made you some by turning a gold piece into lower dominations of coin.\n\n' if coinsOk==False else ''}}
+{{'You did not have enough coin to purchase this item, so we exchanged some higher coins to lower dominations.\n\n' if coinsOk==False else ''}}
 **Coins**
 {{coinsDisp}}
 ___
