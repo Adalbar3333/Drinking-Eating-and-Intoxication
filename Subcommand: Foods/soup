@@ -62,7 +62,7 @@ error=[x for x in pouch[1]if pouch[1][x]<0]
 
 # Increase drunkeness if DC is not met.
 {{dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0}}
-{{ch.mod_cc(cf,+dr) if coinsOk else ""}}
+{{ch.mod_cc(cf,+dr)}}
 
 # String to display based on whether they are making saves or not
 {{p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)}}
@@ -72,7 +72,7 @@ error=[x for x in pouch[1]if pouch[1][x]<0]
 
 -desc "This simple soup is made from carrots, potatoes and bone broth. 
 
-{{'You do not have enough copper pieces to purchase a bowl of soup, come back when you have some more or convert some higher denomination coins to silver and try the command again.\n\n' if coinsOk==False else ''}}**Coins**
+{{'You did not have enough coin to purchase this item, so we exchanged some higher coins to lower dominations.\n\n' if coinsOk==False else ''}}**Coins**
 {{coinsDisp}}
 ___
 **Intoxication Points:** {{ch.get_cc(cc)}}
