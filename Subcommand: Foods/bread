@@ -34,6 +34,8 @@ for coin in coinTypes[:-1]: # for each coin type except for the last one
 error=[x for x in pouch[1]if pouch[1][x]<0]
 </drac2>
 
+{{set_cvar("bags",dump_json(bagsLoaded))}}
+
 # Stores the arguments for later parsing, sets the name of the two CC and collects the constitutionMod
 {{ar,cc,cf,con,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",constitutionMod,character()}}
 
