@@ -72,7 +72,7 @@ error=[x for x in pouch[1]if pouch[1][x]<0]
 
 -desc "Bread is really good at absorbing alcohol, making it easier to digest. An alcoholics best friend. 
 
-{{'You do not have enough copper pieces to purchase some bread, come back when you have some more or convert some higher denomination coins to silver and try the command again.\n\n' if coinsOk==False else ''}}**Coins**
+{{'You did not have enough coin to purchase this item, so we exchanged some higher coins to lower dominations.\n\n' if coinsOk==False else ''}}**Coins**
 {{coinsDisp}}
 ___
 **Intoxication Points:** {{ch.get_cc(cc)}}
