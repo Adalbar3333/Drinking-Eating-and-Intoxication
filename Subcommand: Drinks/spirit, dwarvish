@@ -6,11 +6,10 @@ embed -title "<name> drinks a glass of dwarvish spirit!"
 
 # Removes the indicated coin above from the bag only if there is enough coin to do so
 {{bagsLoaded=load_json(bags)}}
-{{coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],"gp"}}
+{{coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],"cp"}}
 {{coins in bagsLoaded or bagsLoaded.append(coins)}}
-{{coinsOk=True if coins[1][ct]>=costs else False}}
-{{coins[1].update({ct:coins[1][ct]-costs} if coinsOk else "")}}
-{{set_cvar("bags",dump_json(bagsLoaded)) if coinsOk else ""}}
+{{coins[1].update({ct:coins[1][ct]-costs})}}
+{{set_cvar("bags",dump_json(bagsLoaded))}}
 
 <drac2>
 
@@ -49,7 +48,7 @@ error=[x for x in pouch[1]if pouch[1][x]<0]
 {{ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""}}
 
 # Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
-{{"" if helpOk or resetOk or coinsOk==False else ch.mod_cc(cc,+4)}}
+{{"" if helpOk or resetOk else ch.mod_cc(cc,+4)}}
 
 # Sets the value of how many drinks until it starts to make the saves
 {{x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con}}
@@ -72,7 +71,7 @@ error=[x for x in pouch[1]if pouch[1][x]<0]
 
 -desc "This leathel alcohol is kept in a specalized cup to prevent the cup from deteriorating. It is highly suggested you only drink one glass. 
 
-{{{{'You did not have enough coin to purchase this item, so we exchanged some higher coins to lower dominations.\n\n' if coinsOk==False else ''}}**Coins**
+**Coins**
 {{coinsDisp}}
 ___
 **Intoxication Points:** {{ch.get_cc(cc)}}
