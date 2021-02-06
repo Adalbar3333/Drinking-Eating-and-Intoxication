@@ -2,6 +2,7 @@ embed -title "<name> drinks a glass of wine!"
 
 # Sets cost of the wine to 8 copper
 {{costs=8}}
+{{ctype="cp"}}
 
 # Removes the indicated coin above from the bag only if there is enough coin to do so
 {{bagsLoaded=load_json(bags)}}
@@ -10,6 +11,29 @@ embed -title "<name> drinks a glass of wine!"
 {{coinsOk=True if coins[1][ct]>=costs else False}}
 {{coins[1].update({ct:coins[1][ct]-costs} if coinsOk else "")}}
 {{set_cvar("bags",dump_json(bagsLoaded)) if coinsOk else ""}}
+
+<drac2>
+
+coinTypes=["cp","sp","ep","gp","pp"]
+coinRates={"cp":100,"sp":10,"ep":2,"gp":1,"pp":0.1}
+coinPouchName="Coin Pouch"
+newPouch=[[coinPouchName,{x:0 for x in coinTypes}]]
+pouch=([x for x in bagsLoaded if x[0]==coinPouchName] or newPouch)[0]
+
+for coin in coinTypes[:-1]: # for each coin type except for the last one
+    larger = coinTypes[coinTypes.index(coin)+1] # get the coin type that is one larger (cp -> sp, etc)
+    rate = int(coinRates[coin]/coinRates[larger]) # find the rate between the current coin and the larger coin. (cp/sp = 100/10=10)
+    p = pouch[1][coin]//rate # find the new value by dividing the current amount of coins by the rate
+    if pouch[1][coin] < 0: # if our coin subtraction brought this coin type below 0 coins:
+        pouch[1].update( # Update our coin pouch
+        {
+            larger:pouch[1][larger]+p, # Subtract the new value to the larger coin type (since p is negative)
+            coin:pouch[1][coin]-p*rate # Add the new value multiplied by the rate to the smaller coin type
+        } 
+        )
+# If they dont have the coin, it errors. 
+error=[x for x in pouch[1]if pouch[1][x]<0]
+</drac2>
 
 # Stores the arguments for later parsing, sets the name of the two CC and collects the constitutionMod
 {{ar,cc,cf,con,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",constitutionMod,character()}}
