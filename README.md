@@ -7,6 +7,8 @@ The current items are as follows.
 
 You can see all added content in the Added-Content Branch
 
+The Alias now automatically removes and exchange coins when you do not have the correct coin for it. 
+
 
 Drinks
 
