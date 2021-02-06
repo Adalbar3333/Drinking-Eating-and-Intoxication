@@ -6,7 +6,7 @@ embed -title "<name> drinks a glass of dwarvish spirit!"
 
 # Removes the indicated coin above from the bag only if there is enough coin to do so
 {{bagsLoaded=load_json(bags)}}
-{{coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],"cp"}}
+{{coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],"gp"}}
 {{coins in bagsLoaded or bagsLoaded.append(coins)}}
 {{coins[1].update({ct:coins[1][ct]-costs})}}
 {{set_cvar("bags",dump_json(bagsLoaded))}}
