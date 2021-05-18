@@ -9,6 +9,8 @@ You can see all added content in the Added-Content Branch
 
 The Alias now automatically removes and exchange coins when you do not have the correct coin for it. 
 
+The Alias now allows for you to ignore the coins via `-i`, `free`, or `ignore` so the bot dose not remove the coin if you have the argument. 
+
 
 Drinks
 
