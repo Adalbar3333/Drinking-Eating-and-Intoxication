@@ -12,10 +12,12 @@
 "cost":"8",
 
 # `coinType` sets the type of coin, and will take out `cost` amount of that type of coin. It must be in cp (Copper Pieces), sp (Silver Pieces), ep (Electurm Pieces), gp (Gold Pieces), or pp (Platnium Pieces) form
-"coinType":"cp"
+"coinType":"cp",
 
 # `intoxLevel` sets the Intoxication Modifire for the item. 
 "intox":"+1",
 "desc":"This beer is only fancy because it's in glass cup instead of wooden cup."
 
 },{another item set up like above.}]
+
+# Delete all `#` messages when making the svar, or it will error. 
