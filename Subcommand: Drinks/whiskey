@@ -117,5 +117,5 @@ else:
 {{'-f "To take a drink type !drink "Alcohol". to reset your drinking counter type !drink reset to view this help type !drink help. This alias supports **adv, dis, -b,** and **guidance**."' if helpOk else ""}}
 -color <color>
 -thumb <image>
--footer "!drink | by @Adalbär"
+-footer "!drink | by @Adalbär#3333"
 -thumb https://cdn.discordapp.com/attachments/792699041502593025/793347046333218876/beers.png
