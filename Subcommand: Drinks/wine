@@ -8,7 +8,7 @@ coins=[i for i in bagsLoaded if ("Coin" in i[0])][0]
 INTOX = 1
 # Sets cost of the ale to 4 Copper
 costs=8
-ctype="sp"
+ctype="cp"
 
 if any(x in &ARGS& for x in ["ignore", "-i", "free"]):
     # Error Checking
