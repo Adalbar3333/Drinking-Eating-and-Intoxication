@@ -1,9 +1,14 @@
-embed -title "<name> drinks a beer!"
+embed
 <drac2>
 # Stores the arguments for later parsing, sets the name of the two CC and collects the constitutionMod
 ar,cc,cf,con,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",constitutionMod,character()
 bagsLoaded=load_json(bags)
 coins=[i for i in bagsLoaded if ("Coin" in i[0])][0]
+#Intoxication Factor
+INTOX = 1
+# Sets cost of the ale to 4 Copper
+costs=6
+ctype="cp"
 
 if any(x in &ARGS& for x in ["ignore", "-i", "free"]):
     # Error Checking
@@ -17,7 +22,7 @@ if any(x in &ARGS& for x in ["ignore", "-i", "free"]):
     ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""
 
     # Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
-    "" if helpOk or resetOk else ch.mod_cc(cc,+1)
+    "" if helpOk or resetOk else ch.mod_cc(cc, +INTOX)
 
     # Sets the value of how many drinks until it starts to make the saves
     x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con
@@ -38,13 +43,9 @@ if any(x in &ARGS& for x in ["ignore", "-i", "free"]):
     # Clean up the coins bag to display
     coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 else:
-    # Sets cost of the ale to 4 Copper
-    costs=6
-    ctype="cp"
-
     # Removes the indicated coin above from the bag only if there is enough coin to do so
     bagsLoaded=load_json(bags)
-    coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],"cp"
+    coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],ctype
     coins in bagsLoaded or bagsLoaded.append(coins)
     coins[1].update({ct:coins[1][ct]-costs})
     set_cvar("bags",dump_json(bagsLoaded))
@@ -82,7 +83,7 @@ else:
     ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""
 
     # Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
-    "" if helpOk or resetOk else ch.mod_cc(cc,+1)
+    "" if helpOk or resetOk else ch.mod_cc(cc, +INTOX)
 
     # Sets the value of how many drinks until it starts to make the saves
     x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con
@@ -103,11 +104,13 @@ else:
     # Clean up the coins bag to display
     coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 </drac2>
+-title "<name> drinks a beer!"
 -desc "This beer is frothy, and put into a simple wooden or tin tankard. The foam falls over the side, and it gives of a nice armoa."
-{{f'-f "**Costs:** Free!"' if any(x in &ARGS& for x in ["ignore", "-i", "free"]) else f'-f "**Costs:** -4cp"'}}
+{{f'-f "**Costs:** Free!"' if any(x in &ARGS& for x in ["ignore", "-i", "free"]) else f'-f "**Costs:** -{costs}{ctype}"'}}
 -f "**Coins**
 {{coinsDisp}}"
--f "**Intoxication Points:** {{ch.get_cc(cc)}}
+-f "**Intoxication Factor:** +{{INTOX}}
+**Intoxication Points:** {{ch.get_cc(cc)}}
 **Drunkeness Points:** {{ch.cc_str(cf)}}
 {{p}}"
 {{f'-f "{name} is Tipsy:| {name} gains advantage on all Charisma Checks, but disadvantage on all Intelligence checks. "' if ch.get_cc(cf)==1 else f'-f "{name} is drunk:| {name} is under the same effects as tipsy, but they now have advantage on all Strength checks but disadvantage on all Dexterity checks."' if ch.get_cc(cf)==2 else f'-f "{name} has Alcohol Poisioning:| {name} has disadvantage on all attack rolls and ability checks"' if ch.get_cc(cf)==3 else f'-f "{name} has Heavy Alcohol Poisioning:| {name} is still under the effect of Alcohol Poisioning, but their speed is now halved."' if ch.get_cc(cf)==4 else f'-f "{name} has blacked out drunk: | {name} is now incapacitated."' if ch.get_cc(cf)==5 else ""}}
