@@ -5,10 +5,10 @@ ar,cc,cf,con,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",constitution
 bagsLoaded=load_json(bags)
 coins=[i for i in bagsLoaded if ("Coin" in i[0])][0]
 #Intoxication Factor
-INTOX = 4
+INTOX = 1
 # Sets cost of the ale to 4 Copper
-costs=15
-ctype="gp"
+costs=4
+ctype="cp"
 
 if any(x in &ARGS& for x in ["ignore", "-i", "free"]):
     # Error Checking
@@ -104,8 +104,8 @@ else:
     # Clean up the coins bag to display
     coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 </drac2>
--title "<name> drinks a glass of dwarvish spirit!"
--desc "This leathel alcohol is kept in a specalized cup to prevent the cup from deteriorating. It is highly suggested you only drink one glass."
+-title "<name> drinks an ale!"
+-desc "This warm, fruity, and sweet alcohol is a nice drink during the colder months, but can also be enjoyed cold."
 {{f'-f "**Costs:** Free!"' if any(x in &ARGS& for x in ["ignore", "-i", "free"]) else f'-f "**Costs:** -{costs}{ctype}"'}}
 -f "**Coins**
 {{coinsDisp}}"
