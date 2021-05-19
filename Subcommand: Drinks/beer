@@ -53,10 +53,6 @@ if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
 -desc "Sorry, but {name} does not have enough gold to buy a {itemName}. You should go and try and get some more coin before trying to order another item."'''
 	else:
 		set_cvar("bags",dump_json(bagsLoaded))
-		# Error Checking
-		helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
-		resetOk=True if ar.get("reset") or ar.get("Reset") else Fals
-				
 		# Create the CC if they didn't exist
 		ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
 		
