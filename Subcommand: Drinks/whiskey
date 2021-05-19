@@ -73,7 +73,7 @@ if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
 
 		# String to display based on whether they are making saves or not
 		p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
-		text = f'''-title "<name> drinks a glass of whiskey!"
+		text = f'''-title "{name} drinks a glass of whiskey!"
 -desc "A simple whiskey generally served over some ice in a nice wooden tankard."
 -f "**Coins**
 {coinsDisp}"'''
@@ -102,7 +102,7 @@ else:
 
 	# String to display based on whether they are making saves or not
 	p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
-	text = f'''-title "<name> drinks a glass of whiskey!"
+	text = f'''-title "{name} drinks a glass of whiskey!"
 -desc "A simple whiskey generally served over some ice in a nice wooden tankard."
 -f "**Coins**
 {coinsDisp}"'''
