@@ -16,14 +16,8 @@ INTOX = 1
 costs=6
 ctype="cp"
 itemName = "Beer"
-# Description
-text = f'''-title "{name} drinks a {itemName}!"
--desc "This beer is frothy, and put into a simple wooden or tin tankard. The foam falls over the side, and it gives of a nice armoa."
--f "**Coins**
-{coinsDisp}"'''
 
 if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
-
 	coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],ctype
 	coins in bagsLoaded or bagsLoaded.append(coins)
 	coins[1].update({ct:coins[1][ct]-costs})
@@ -53,6 +47,8 @@ if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
 -desc "Sorry, but {name} does not have enough gold to buy a {itemName}. You should go and try and get some more coin before trying to order another item."'''
 	else:
 		set_cvar("bags",dump_json(bagsLoaded))
+		coins=[i for i in bagsLoaded if ("Coin" in i[0])][0]
+		coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 		# Create the CC if they didn't exist
 		ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
 		
@@ -77,6 +73,10 @@ if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
 
 		# String to display based on whether they are making saves or not
 		p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
+		text = f'''-title "{name} drinks a {itemName}!"
+-desc "This beer is frothy, and put into a simple wooden or tin tankard. The foam falls over the side, and it gives of a nice armoa."
+-f "**Coins**
+{coinsDisp}"'''
 else:		
 	# Create the CC if they didn't exist
 	ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
@@ -102,6 +102,10 @@ else:
 
 	# String to display based on whether they are making saves or not
 	p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
+	text = f'''-title "{name} drinks a {itemName}!"
+-desc "This beer is frothy, and put into a simple wooden or tin tankard. The foam falls over the side, and it gives of a nice armoa."
+-f "**Coins**
+{coinsDisp}"'''
 return text
 </drac2>
 
