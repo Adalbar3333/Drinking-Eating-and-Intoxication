@@ -9,6 +9,8 @@ bagsLoaded=load_json(bags)
 coins=[i for i in bagsLoaded if ("Coin" in i[0])][0]
 helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
 resetOk=True if ar.get("reset") or ar.get("Reset") else False
+# Clean up the coins bag to display
+coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 # Sets Intoxication Factor, costs, coin type, and the item's name. 
 INTOX = 1
 costs=6
@@ -16,7 +18,9 @@ ctype="cp"
 itemName = "Beer"
 # Description
 text = f'''-title "{name} drinks a {itemName}!"
--desc "This beer is frothy, and put into a simple wooden or tin tankard. The foam falls over the side, and it gives of a nice armoa."'''
+-desc "This beer is frothy, and put into a simple wooden or tin tankard. The foam falls over the side, and it gives of a nice armoa."
+-f "**Coins**
+{coinsDisp}"'''
 
 if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
 
@@ -45,11 +49,10 @@ if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
 	error or pouch[1].update({coinType:pouch[1][coinType]+amount})
 	error=[x for x in pouch[1]if pouch[1][x]<0]
 	if error: 
-		bagsLoaded=load_json(bags)
 		text = f'''-title "{name} does not have the gold to purchas this!" 
 -desc "Sorry, but {name} does not have enough gold to buy a {itemName}. You should go and try and get some more coin before trying to order another item."'''
 	else:
-		character().set_cvar("bags",dump_json(bagsLoaded))
+		set_cvar("bags",dump_json(bagsLoaded))
 		# Error Checking
 		helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
 		resetOk=True if ar.get("reset") or ar.get("Reset") else Fals
@@ -103,16 +106,10 @@ else:
 
 	# String to display based on whether they are making saves or not
 	p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
-
-# Clean up the coins bag to display
-coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
-# Error Checking
 return text
 </drac2>
 
 {{f'-f "**Costs:** Free!"' if any(x in &ARGS& for x in ["ignore", "-i", "free"]) else f'-f "**Costs:** -{costs}{ctype}"'}}
--f "**Coins**
-{{coinsDisp}}"
 -f "**Intoxication Factor:** +{{INTOX}}
 **Intoxication Points:** {{ch.get_cc(cc)}}
 **Drunkeness Points:** {{ch.cc_str(cf)}}
