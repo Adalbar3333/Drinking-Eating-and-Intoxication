@@ -105,7 +105,7 @@ else:
     coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 </drac2>
 -title "<name> drinks a glass of wine!"
--desc "This simple wine is a drink meant for all with a refined taste, but not so intoxicating. It's sweet or tart tase can make anyone a little happy.""
+-desc "This simple wine is a drink meant for all with a refined taste, but not so intoxicating. It's sweet or tart tase can make anyone a little happy."
 {{f'-f "**Costs:** Free!"' if any(x in &ARGS& for x in ["ignore", "-i", "free"]) else f'-f "**Costs:** -{costs}{ctype}"'}}
 -f "**Coins**
 {{coinsDisp}}"
