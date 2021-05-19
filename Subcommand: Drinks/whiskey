@@ -15,7 +15,7 @@ coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 INTOX = 3
 costs=5
 ctype="sp"
-itemName = "Beer"
+itemName = "Whiskey"
 
 if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
 	coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],ctype
@@ -120,4 +120,3 @@ return text
 -thumb <image>
 -footer "!drink | by @Adalbär#3333"
 -thumb https://cdn.discordapp.com/attachments/792699041502593025/793347046333218876/beers.png
-=
