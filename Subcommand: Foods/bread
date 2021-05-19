@@ -2,113 +2,114 @@ embed
 <drac2>
 # Stores the arguments for later parsing, sets the name of the two CC and collects the constitutionMod
 ar,cc,cf,con,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",constitutionMod,character()
+coinTypes=["cp","sp","ep","gp","pp"]
+newPouch=[["Coin Pouch",{x:0 for x in coinTypes}]]
+set_cvar_nx("bags",dump_json(newPouch))
 bagsLoaded=load_json(bags)
 coins=[i for i in bagsLoaded if ("Coin" in i[0])][0]
-#Intoxication Factor
+helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
+resetOk=True if ar.get("reset") or ar.get("Reset") else False
+# Clean up the coins bag to display
+coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
+# Sets Intoxication Factor, costs, coin type, and the item's name. 
 INTOX = -2
-# Sets cost of the item.
-costs=1
+costs=2
 ctype="cp"
+itemName = "plate of Breads and Cheeses"
 
-if any(x in &ARGS& for x in ["ignore", "-i", "free"]):
-    # Error Checking
-    helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
-    resetOk=True if ar.get("reset") or ar.get("Reset") else False
+if not any(x in &ARGS& for x in ["ignore", "-i", "free"]):
+	coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],ctype
+	coins in bagsLoaded or bagsLoaded.append(coins)
+	coins[1].update({ct:coins[1][ct]-costs})
+	coinRates={"cp":100,"sp":10,"ep":2,"gp":1,"pp":0.1}
+	coinPouchName="Coin Pouch"
+	newPouch=[[coinPouchName,{x:0 for x in coinTypes}]]
+	pouch=([x for x in bagsLoaded if x[0]==coinPouchName] or newPouch)[0]
 
-    # Create the CC if they didn't exist
-    ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
+	for coin in coinTypes[:-1]: # for each coin type except for the last one
+		larger = coinTypes[coinTypes.index(coin)+1] # get the coin type that is one larger (cp -> sp, etc)
+		rate = int(coinRates[coin]/coinRates[larger]) # find the rate between the current coin and the larger coin. (cp/sp = 100/10=10)
+		p = pouch[1][coin]//rate # find the new value by dividing the current amount of coins by the rate
+		if pouch[1][coin] < 0: # if our coin subtraction brought this coin type below 0 coins:
+			pouch[1].update( # Update our coin pouch
+			{
+				larger:pouch[1][larger]+p, # Subtract the new value to the larger coin type (since p is negative)
+				coin:pouch[1][coin]-p*rate # Add the new value multiplied by the rate to the smaller coin type
+			} 
+			)
+	coinType=''.join([x for x in &ARGS&[1:] if not x.isdigit()])
+	pouch in bagsLoaded or bagsLoaded.append(pouch)
+	error=not coinType in coinTypes
+	error or pouch[1].update({coinType:pouch[1][coinType]+amount})
+	error=[x for x in pouch[1]if pouch[1][x]<0]
+	if error: 
+		text = f'''-title "{name} does not have the gold to purchas this!" 
+-desc "Sorry, but {name} does not have enough gold to buy a {itemName}. You should go and try and get some more coin before trying to order another item."'''
+	else:
+		set_cvar("bags",dump_json(bagsLoaded))
+		coins=[i for i in bagsLoaded if ("Coin" in i[0])][0]
+		coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
+		# Create the CC if they didn't exist
+		ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
+		
+		# Reset drinks if reset is sent
+		ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""
+		
+		# Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
+		"" if helpOk or resetOk else ch.mod_cc(cc, +INTOX)
+		
+		# Sets the value of how many drinks until it starts to make the saves
+		x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con
+		
+		# Sets the incremental DC which is based off the amount of drinks taken minus their constitution modifier
+		dc=10+((y*2)-2)
+		
+		# Checks if advantage, disadvantage, guidance or a bonus was added to the roll and applies appropriate dice String
+		d=vroll(f"""{["1d20", "2d20kh1", "2d20kl1"][ar.adv()]}+{str(constitutionSave)}{f"+{ar.join('b', '+')}" if ar.get("b") else ""}{"+1d4" if ar.get("guidance") else ""}""")
+		
+		# Increase drunkeness if DC is not me		t.
+		dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0
+		ch.mod_cc(cf,+dr)
 
-    # Reset drinks if reset is sent
-    ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""
-
-    # Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
-    "" if helpOk or resetOk else ch.mod_cc(cc, +INTOX)
-
-    # Sets the value of how many drinks until it starts to make the saves
-    x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con
-
-    # Sets the incremental DC which is based off the amount of drinks taken minus their constitution modifier
-    dc=10+((y*2)-2)
-
-    # Checks if advantage, disadvantage, guidance or a bonus was added to the roll and applies appropriate dice string
-    d=vroll(f"""{["1d20", "2d20kh1", "2d20kl1"][ar.adv()]}+{str(constitutionSave)}{f"+{ar.join('b', '+')}" if ar.get("b") else ""}{"+1d4" if ar.get("guidance") else ""}""")
-
-    # Increase drunkeness if DC is not met.
-    dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0
-    ch.mod_cc(cf,+dr)
-
-    # String to display based on whether they are making saves or not
-    p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
-
-    # Clean up the coins bag to display
-    coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
-else:
-    # Removes the indicated coin above from the bag only if there is enough coin to do so
-    bagsLoaded=load_json(bags)
-    coins,ct=[i for i in bagsLoaded if ("Coin" in i[0])][0],ctype
-    coins in bagsLoaded or bagsLoaded.append(coins)
-    coins[1].update({ct:coins[1][ct]-costs})
-    set_cvar("bags",dump_json(bagsLoaded))
-
-    coinTypes=["cp","sp","ep","gp","pp"]
-    coinRates={"cp":100,"sp":10,"ep":2,"gp":1,"pp":0.1}
-    coinPouchName="Coin Pouch"
-    newPouch=[[coinPouchName,{x:0 for x in coinTypes}]]
-    pouch=([x for x in bagsLoaded if x[0]==coinPouchName] or newPouch)[0]
-
-    for coin in coinTypes[:-1]: # for each coin type except for the last one
-        larger = coinTypes[coinTypes.index(coin)+1] # get the coin type that is one larger (cp -> sp, etc)
-        rate = int(coinRates[coin]/coinRates[larger]) # find the rate between the current coin and the larger coin. (cp/sp = 100/10=10)
-        p = pouch[1][coin]//rate # find the new value by dividing the current amount of coins by the rate
-        if pouch[1][coin] < 0: # if our coin subtraction brought this coin type below 0 coins:
-            pouch[1].update( # Update our coin pouch
-            {
-                larger:pouch[1][larger]+p, # Subtract the new value to the larger coin type (since p is negative)
-                coin:pouch[1][coin]-p*rate # Add the new value multiplied by the rate to the smaller coin type
-            } 
-            )
-    # If they dont have the coin, it errors. 
-    error=[x for x in pouch[1]if pouch[1][x]<0]
-
-    set_cvar("bags",dump_json(bagsLoaded))
-
-    # Error Checking
-    helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
-    resetOk=True if ar.get("reset") or ar.get("Reset") else False
-
-    # Create the CC if they didn't exist
-    ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
-
-    # Reset drinks if reset is sent
-    ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""
-
-    # Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
-    "" if helpOk or resetOk else ch.mod_cc(cc, +INTOX)
-
-    # Sets the value of how many drinks until it starts to make the saves
-    x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con
-
-    # Sets the incremental DC which is based off the amount of drinks taken minus their constitution modifier
-    dc=10+((y*2)-2)
-
-    # Checks if advantage, disadvantage, guidance or a bonus was added to the roll and applies appropriate dice string
-    d=vroll(f"""{["1d20", "2d20kh1", "2d20kl1"][ar.adv()]}+{str(constitutionSave)}{f"+{ar.join('b', '+')}" if ar.get("b") else ""}{"+1d4" if ar.get("guidance") else ""}""")
-
-    # Increase drunkeness if DC is not met.
-    dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0
-    ch.mod_cc(cf,+dr)
-
-    # String to display based on whether they are making saves or not
-    p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
-
-    # Clean up the coins bag to display
-    coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
-</drac2>
--title "<name> eats some bread!"
--desc "Bread is really good at absorbing alcohol, making it easier to digest. An alcoholics best friend."
-{{f'-f "**Costs:** Free!"' if any(x in &ARGS& for x in ["ignore", "-i", "free"]) else f'-f "**Costs:** -{costs}{ctype}"'}}
+		# String to display based on whether they are making saves or not
+		p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
+		text = f'''-title "{name} eats a {itemName}!"
+-desc "This is a plate of assorted breads and cheeses. Bread is really good at absorbing alcohol, making it easier to digest. An alcoholics best friend."
 -f "**Coins**
-{{coinsDisp}}"
+{coinsDisp}"'''
+else:		
+	# Create the CC if they didn't exist
+	ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
+	
+	# Reset drinks if reset is sent
+	ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""
+	
+	# Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
+	"" if helpOk or resetOk else ch.mod_cc(cc, +INTOX)
+	
+	# Sets the value of how many drinks until it starts to make the saves
+	x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con
+	
+	# Sets the incremental DC which is based off the amount of drinks taken minus their constitution modifier
+	dc=10+((y*2)-2)
+	
+	# Checks if advantage, disadvantage, guidance or a bonus was added to the roll and applies appropriate dice String
+	d=vroll(f"""{["1d20", "2d20kh1", "2d20kl1"][ar.adv()]}+{str(constitutionSave)}{f"+{ar.join('b', '+')}" if ar.get("b") else ""}{"+1d4" if ar.get("guidance") else ""}""")
+	
+	# Increase drunkeness if DC is not me	t.
+	dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0
+	ch.mod_cc(cf,+dr)
+
+	# String to display based on whether they are making saves or not
+	p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
+	text = f'''-title "{name} eats a {itemName}!"
+-desc "This is a plate of assorted breads and cheeses. Bread is really good at absorbing alcohol, making it easier to digest. An alcoholics best friend."
+-f "**Coins**
+{coinsDisp}"'''
+return text
+</drac2>
+
+{{f'-f "**Costs:** Free!"' if any(x in &ARGS& for x in ["ignore", "-i", "free"]) else f'-f "**Costs:** -{costs}{ctype}"'}}
 -f "**Intoxication Factor:** +{{INTOX}}
 **Intoxication Points:** {{ch.get_cc(cc)}}
 **Drunkeness Points:** {{ch.cc_str(cf)}}
