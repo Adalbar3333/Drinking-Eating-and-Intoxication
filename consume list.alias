@@ -1,0 +1,27 @@
+embed 
+<drac2>
+A = '&ARGS&'
+a = argparse(A)
+ch = character 
+items = load_json(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
+items += load_json(get_svar('hbConsume', '[]'))
+foods = []
+drinks = []
+uncertians = []
+for item in items:
+	if item.get('type'):
+		if item.type == 'food':
+			foods.append(f'{item.fancyName}: {item.cost}{item.coinType} | INTOX {item.intox}')
+		if item.type == 'drink':
+			drinks.append(f'{item.fancyName}: {item.cost}{item.coinType} | INTOX {item.intox}')
+		if item.type != 'drink' and item.type != 'food':
+			 uncertians.append(f'{item.fancyName}: {item.cost}{item.coinType} | INTOX {item.intox}')
+	else:
+		uncertians.append(f'{item.fancyName}: {item.cost}{item.coinType} | INTOX {item.intox}')
+foods = '\n'.join(foods)
+drinks = '\n'.join(drinks)
+uncertians = '\n'.join(uncertians)
+text = f''' -title "Here Is The List of All Foods, Drinks, and,,, Uncertians" -f "Foods|{foods}" -f "Drinks|{drinks}" -f "Uncertians|{uncertians if uncertians else 'None'}"'''
+text += f''' -footer "{ctx.prefix}{ctx.alias} list | Adalbär#3333" -thumb "https://cdn.discordapp.com/attachments/792699041502593025/793347046333218876/beers.png"'''
+return text 
+</drac2>

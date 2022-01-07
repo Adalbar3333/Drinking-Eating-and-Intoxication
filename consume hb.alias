@@ -1,0 +1,1 @@
+!tembed -desc "You don't need to do `{{ctx.prefix}}{{ctx.alias}} hb` anymore! It is now appart of the main alias, so your homebrew drinks can now be accessed via the main command. This subalias will be deleted on {{f'<t:1640196000:F>'}}!"

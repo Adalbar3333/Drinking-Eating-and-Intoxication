@@ -1,0 +1,1 @@
+This command shows all updates for the alias as well as a detailed list of all features. 

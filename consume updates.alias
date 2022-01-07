@@ -1,0 +1,22 @@
+embed 
+-title "Current Updates and Features"
+-desc "Hi! And thank you for choosing this alias to add this fun new mechanic to your game. You can look the github to this collection via this [link](https://github.com/Adalbar3333/Drinking-Eating-and-Intoxication).
+
+Here are a few notices and whatnot to help keep you updated."
+-f "Update: 2/19/2021| The error fo you not having a coins bag is no longer an issue. The alias now adds a coin pouch to your existing `bags` cvar, or makes the cvar for you."
+-f "Update: 5/18/2021| There is now the `free` variable wich allows you to consume an item for free.
+Issue with Homebrew items with automatic coin conversion has been fixed."
+-f "Functionallity| Most alias' are useable via `!consume drink-name`. 
+**Automaitc Coin Inversion:** This alias both removes coins from your character's bag, as well as make higer coin types into smaller if nessicary.
+**Homebrewed Rules for Intoxication:** This alias adds a few Homebrewed rules that add an extra layer to the game for Role Play. Your characters now get buffs and debuffs when getting more and more intoxicated.
+**Homebrew Support:** You can even add your own homebrew via a SVAR (Server Variable). You can find instructions on how to set that up on my [github](https://github.com/Adalbar3333/Drinking-Eating-and-Intoxication/blob/main/Example%20Homebrew%20Consume)."
+-f "{{f'<t:1639920300:F>'}}: All items, one alias!|- All items, normal and HB alike are all accesiable via `{{ctx.prefix}}{{ctx.alias}}`, and no longer need the `hb` argument. 
+- `{{ctx.prefix}}{{ctx.alias}} catalogue|list` each list all items base and HB. They show the price and INTOX factor. 
+- Items now have a `type` variable. The variable can either be 'drink' or 'food', otherwise, the item will be defined as 'uncertian'. I am working on an update to this.
+- `hbConsume` now also can be just a GVAR to your HB items."
+-f "{{f'<t:1640021400:F>'}} Let me get you a drink!|- `{{ctx.prefix}}{{ctx.alias}} <item>` now supports the `order` argument. You can now buy a drink for someone without drinking it. You can specify who via a `-for [name]` argument."
+-f "Upcomming Updates|- Settings: Remove the default items from the list and set a dfault via a gvar!
+- Shenanigans: Introduce a command to roll random encounters within a bar setting. 
+- Status: An alias to add your current status of drunkenness to the initiative tracker. 
+- Snippets: A few snippets to state your bonuses as text in your rolls."
+-footer "@Adalbär#3333 | Added by 303 people and 516 servers"
