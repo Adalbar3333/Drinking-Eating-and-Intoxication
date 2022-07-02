@@ -127,7 +127,7 @@ elif a.get('order'):
 		# Removes the indicated coin above from the bag only if there is enough coin to do so
 		error, coins = handle_coins(costs, ctype)
 		if error:
-			coinsDisp=str(coins).strip("}{").replace("'","").replace(",","\n")
+			coinsDisp="\n".join([f"{coin}: {value}" for coin, value in coins.items()])
 
 			text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" -f "{name}'s Coins|{coinsDisp}"'''
 			return text
