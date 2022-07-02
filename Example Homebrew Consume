@@ -7,6 +7,8 @@
 
 # `name` sets up the command, so this drink will be called via `!consume hb example-drink`
 "name":"example-drink",
+# `type` defines it as what type of item it is. Any item with the same type will show up under the same header within the catalogue when presented. 
+"type":"Example Drink",
 
 # `cost` sets up the ammount of coins it will take out. 
 "cost":"8",
