@@ -1,6 +1,6 @@
 # Homebrew Consume Example
 
-!svar hbConsume
+```!svar hbConsume
 [{
 # `fancyName` will present what you put in for it, so this will present "Example Drink" as it's name. 
 "fancyName":"Example Drink",
@@ -23,3 +23,4 @@
 },{another item set up like above.}]
 
 # Delete all `#` messages when making the svar, or it will error. 
+```
