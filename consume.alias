@@ -3,6 +3,7 @@ embed
 A = &ARGS&
 a = argparse(A)
 text = ''
+ch = character()
 if not A or a.get('help', a.get('?')):
 	ar,cc,cf,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",character()
 	ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
@@ -35,7 +36,7 @@ if not drink:
 	text = f''' -title "Not In Stock-" -desc "Sorry friend, but we don't have any {userdrink.capitalize()} in stock. You can take a look at our catalog, if you'd like." -f "`{ctx.prefix}{ctx.alias} catalogue` or `{ctx.prefix}{ctx.alias} list` will allow you to look at all available drinks and food."'''
 	return text
 # Sets cost of the item to whatever the homebrew item is
-costs= (int(drink["cost"]) if drink else 0)
+costs= -(abs(int(drink["cost"])) if drink else 0)
 ctype= (drink["coinType"] if drink else "")
 # Sets the intoxication factor for the homebrew item. 
 INTOX= (int(drink["intox"])if drink else "")
@@ -101,7 +102,7 @@ elif a.get('order'):
 			text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" -f "{name}'s Coins|{coinsDisp}"'''
 			return text
 		else:
-			set_cvar("bags",dump_json(bagsLoaded))
+			ch.set_cvar("bags",dump_json(bagsLoaded))
 	coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 	text += f''' -title "{name} Bought A {drink["fancyName"]}{f""" for {a.last('for')}""" if a.get('for') else ''}!" -desc "{drink['desc']}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** {costs}{ctype}'}" -f "**Coins**|{coinsDisp}"'''
 	return text
@@ -137,7 +138,7 @@ else:
 		text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" -f "{name}'s Coins|{coinsDisp}"'''
 		return text
 	else:
-		set_cvar("bags",dump_json(bagsLoaded))
+		ch.set_cvar("bags",dump_json(bagsLoaded))
 
 	# Error Checking
 	helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
@@ -171,6 +172,6 @@ else:
 	# Clean up the coins bag to display
 	coinsDisp=str(coins[1]).strip("}{").replace("'","").replace(",","\n")
 status = f' -f "{name} is Tipsy:| {name} gains advantage on all Charisma Checks, but disadvantage on all Intelligence checks. "' if ch.get_cc(cf)==1 else f'-f "{name} is drunk:| {name} is under the same effects as tipsy, but they now have advantage on all Strength checks but disadvantage on all Dexterity checks."' if ch.get_cc(cf)==2 else f'-f "{name} has Alcohol Poisioning:| {name} has disadvantage on all attack rolls and ability checks"' if ch.get_cc(cf)==3 else f'-f "{name} has Heavy Alcohol Poisioning:| {name} is still under the effect of Alcohol Poisioning, but their speed is now halved."' if ch.get_cc(cf)==4 else f'-f "{name} has blacked out drunk: | {name} is now incapacitated."' if ch.get_cc(cf)==5 else ""
-text += f''' -title "{name} consumes a {drink["fancyName"] if drink else ''}!" -desc "{(drink['desc'] if drink else '')}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** {costs}{ctype}'}" -f "**Coins**|{coinsDisp}" -f "**Intoxication Factor:** +{INTOX}\n**Intoxication Points:** {ch.get_cc(cc)}\n**Drunkeness Points:** {ch.cc_str(cf)}\n{p}" {status} -color <color> -thumb <image>'''
+text += f''' -title "{name} consumes a {drink["fancyName"] if drink else ''}!" -desc "{(drink['desc'] if drink else '')}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** -{abs(int(costs))}{ctype}'}" -f "**Coins**|{coinsDisp}" -f "**Intoxication Factor:** +{INTOX}\n**Intoxication Points:** {ch.get_cc(cc)}\n**Drunkeness Points:** {ch.cc_str(cf)}\n{p}" {status} -color <color> -thumb <image>'''
 return text 
 </drac2>

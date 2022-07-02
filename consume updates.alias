@@ -1,5 +1,5 @@
 embed 
--title "Current Updates and Features"
+-title "Current Updates and Features - Drinking Eating and Intoxication (v2.1)"
 -desc "Hi! And thank you for choosing this alias to add this fun new mechanic to your game. You can look the github to this collection via this [link](https://github.com/Adalbar3333/Drinking-Eating-and-Intoxication).
 
 Here are a few notices and whatnot to help keep you updated."
@@ -14,8 +14,15 @@ Issue with Homebrew items with automatic coin conversion has been fixed."
 - `{{ctx.prefix}}{{ctx.alias}} catalogue|list` each list all items base and HB. They show the price and INTOX factor. 
 - Items now have a `type` variable. The variable can either be 'drink' or 'food', otherwise, the item will be defined as 'uncertian'. I am working on an update to this.
 - `hbConsume` now also can be just a GVAR to your HB items."
--f "{{f'<t:1640021400:F>'}} Let me get you a drink!|- `{{ctx.prefix}}{{ctx.alias}} <item>` now supports the `order` argument. You can now buy a drink for someone without drinking it. You can specify who via a `-for [name]` argument."
--f "Upcomming Updates|- Settings: Remove the default items from the list and set a dfault via a gvar!
+-f "{{f'<t:1640021400:F>'}} Let me get you a drink!|- `{{ctx.prefix}}{{ctx.alias}} <item>` now supports the `order` argument. You can now buy a drink for someone without drinking it. You can specify who via a `-for [name]` argument. __This does not add the status/effects to the person you describe via the `-for` argument.__"
+{{disp="{baseItems:False}"}}
+-f "{{f'<t:1644032153:F>'}} Cleaned up the Menu, Fixed some Bugs (v2.1)|You can now do `!consume menu` to see all avaliable drinks. Item's will be catagorized by type now, instead of being put under `Uncertians`, there is no more uncertian type.
+You can now create a svar called `consumeSettings` with the following info to disable the base existing items.:
+`{{disp}}`"
+-f "Bug Fix: Homebrew GVAR was not working when there was more than one in a list. 
+Prices no longer need to be +/- for items. You can now just put the number, and it will reduce the amount.
+Thanks @Phillip_J_Fry#4213!"
+-f "Upcomming Updates|~~- Settings: Remove the default items from the list and set a dfault via a gvar!~~
 - Shenanigans: Introduce a command to roll random encounters within a bar setting. 
 - Status: An alias to add your current status of drunkenness to the initiative tracker. 
 - Snippets: A few snippets to state your bonuses as text in your rolls."
