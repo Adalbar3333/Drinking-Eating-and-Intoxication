@@ -5,9 +5,9 @@ a = argparse(A)
 text = ''
 ch = character()
 
-DEFAULT_COIN_RATES = {"cp":100,"sp":10,"ep":2,"gp":1,"pp":0.1}
-COIN_RATES = get_svar("coinRates") or get("coinRates", DEFAULT_COIN_RATES)
-COIN_TYPES = list(COIN_RATES)
+DEFAULT_coinRates = {"cp":100,"sp":10,"ep":2,"gp":1,"pp":0.1}
+coinRates = get_svar("coinRates") or get("coinRates", DEFAULT_coinRates)
+coinTypes = list(coinRates)
 coinPouchName = get_svar("coinPouchName") or get("coinPouchName","Coin Pouch")
 
 if not A or a.get('help', a.get('?')):
@@ -21,9 +21,9 @@ if not A or a.get('help', a.get('?')):
 	text += f''' -f "Drink Responsibly!" -color <color> -thumb <image> -f "Check out `!consume updates` for updates, and you can get the `!coins` alias off the [support server](https://discord.gg/HtFqV3p7QN)." -footer "{ctx.prefix}{ctx.alias} | Adalbär#3333" -thumb "https://cdn.discordapp.com/attachments/792699041502593025/793347046333218876/beers.png"'''
 	return text
 	
-def handle_coins(costs, ctype=COIN_TYPES[0]):
+def handle_coins(costs, ctype=coinTypes[0]):
 	bagsLoaded = load_json(get('bags', ''))
-	maybepouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'] or COIN_RATES != DEFAULT_COIN_RATES and [["Coin Pouch", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0}]]
+	maybepouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'] or coinRates != DEFAULT_coinRates and [["Coin Pouch", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0}]]
 	if maybepouch:
 		pouch = maybepouch[0]
 		if pouch not in bagsLoaded:
@@ -53,12 +53,12 @@ def handle_coins(costs, ctype=COIN_TYPES[0]):
 		delta = parse_coins(f"{costs}{ctype}")
 		if not (error:=-delta.total > purse.total):
 			purse.modify_coins(delta.pp, delta.gp, delta.ep, delta.sp, delta.cp)
-		coins = {coin:purse[coin] for coin in COIN_TYPES}
+		coins = {coin:purse[coin] for coin in coinTypes}
 	return error, coins
 	
 def get_coins():
 	bagsLoaded = load_json(get('bags', ''))
-	maybepouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'] or COIN_RATES != DEFAULT_COIN_RATES and [["Coin Pouch", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0}]]
+	maybepouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'] or coinRates != DEFAULT_coinRates and [["Coin Pouch", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0}]]
 	if maybepouch:
 		pouch = maybepouch[0]
 		if pouch not in bagsLoaded:
@@ -67,7 +67,7 @@ def get_coins():
 		coins = pouch[1]
 	else:
 		purse = character().coinpurse
-		coins = {coin:purse[coin] for coin in COIN_TYPES}
+		coins = {coin:purse[coin] for coin in coinTypes}
 	return coins
 
 drinks = load_json(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
