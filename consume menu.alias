@@ -8,19 +8,19 @@ n = '\n'
 if get_svar("consumeSettings"):
 	csettings = load_yaml(get_svar("consumeSettings"))
 	if csettings.baseItems == True:
-		items = load_json(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
+		items = load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
 else:
-	items = load_json(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
+	items = load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
 
 
 svar = get_svar('hbConsume', '[]') if ctx.guild else '[]'
 if svar.startswith('[{'):
-	items += load_json(svar)
+	items += load_yaml(svar)
 elif len(svar) == 36:
-	items += load_json(get_gvar(svar))
+	items += load_yaml(get_gvar(svar))
 elif svar.startswith('[') and len(svar) > 2: 
 	for gvar in svar:
-		items += load_json(get_gvar(gvar))
+		items += load_yaml(get_gvar(gvar))
 
 types = []
 for item in items:

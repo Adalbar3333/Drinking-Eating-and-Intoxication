@@ -22,7 +22,7 @@ if not A or a.get('help', a.get('?')):
 	return text
 	
 def handle_coins(costs, ctype=coinTypes[0]):
-	bagsLoaded = load_json(get('bags', ''))
+	bagsLoaded = load_yaml(get('bags', '[]'))
 	maybepouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'] or coinRates != DEFAULT_coinRates and [["Coin Pouch", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0}]]
 	if maybepouch:
 		pouch = maybepouch[0]
@@ -57,7 +57,7 @@ def handle_coins(costs, ctype=coinTypes[0]):
 	return error, coins
 	
 def get_coins():
-	bagsLoaded = load_json(get('bags', ''))
+	bagsLoaded = load_yaml(get('bags', ''))
 	maybepouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'] or coinRates != DEFAULT_coinRates and [["Coin Pouch", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0}]]
 	if maybepouch:
 		pouch = maybepouch[0]
@@ -70,15 +70,15 @@ def get_coins():
 		coins = {coin:purse[coin] for coin in coinTypes}
 	return coins
 
-drinks = load_json(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
+drinks = load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
 svar = get_svar('hbConsume', '[]') if ctx.guild else '[]'
 if svar.startswith('[{'):
-	drinks += load_json(svar)
+	drinks += load_yaml(svar)
 elif len(svar) == 36:
-	drinks += load_json(get_gvar(svar))
+	drinks += load_yaml(get_gvar(svar))
 elif svar.startswith('[') and len(svar) > 2: 
 	for gvar in svar:
-		drinks += load_json(get_gvar(gvar))
+		drinks += load_yaml(get_gvar(gvar))
 else: 
 	random = False
 userdrink = '&1&'

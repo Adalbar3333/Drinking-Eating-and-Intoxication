@@ -23,7 +23,6 @@ You can now create a svar called `consumeSettings` with the following info to di
 Prices no longer need to be +/- for items. You can now just put the number, and it will reduce the amount.
 Thanks @Phillip_J_Fry#4213!"
 -f "Upcomming Updates|~~- Settings: Remove the default items from the list and set a dfault via a gvar!~~
-- Shenanigans: Introduce a command to roll random encounters within a bar setting. 
-- Status: An alias to add your current status of drunkenness to the initiative tracker. 
-- Snippets: A few snippets to state your bonuses as text in your rolls."
+- `{{ctx.prefix}}{{ctx.alias}} status`: An alias to add your current status of drunkenness to the initiative tracker altering how your rolls are made.
+- Snippets: A few snippets to state your bonuses as text in your rolls when outside of initiaves."
 -footer "@Adalbär#3333 | Added by 303 people and 516 servers"
