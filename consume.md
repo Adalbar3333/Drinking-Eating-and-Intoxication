@@ -9,3 +9,5 @@ Any drink rolls saves after you exceed your given intoxication limit. You can fi
 `catalogue|list` shows all items that you can purchase. 
 `rules|help` will display the rules for drinking, and set up custom counters. This can also be achieved by doing just `!consume`
 `updates` shows a full list of updates and planned updates.
+
+If you want to add Homebrew, check out how [here](https://github.com/Adalbar3333/Drinking-Eating-and-Intoxication/blob/main/Example%20Homebrew%20Consume.md)
