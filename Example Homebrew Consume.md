@@ -1,6 +1,23 @@
 # Homebrew Consume Example
 
 Please use this as an example only! This is not designed to be used as is, and you are fully capable of editing it.
+
+**JSON example**
+```json
+[
+  {
+    "fancyName": "Example Drink",
+    "name": "example-drink",
+    "type": "Example Drink",
+    "cost": "8",
+    "coinType": "cp",
+    "intox": "+1",
+    "desc": "This beer is only fancy because it's in glass cup instead of wooden cup."
+  },
+  "Another Item Like Above"
+]```
+
+**YMAL CURRENTLY DOES NOT WORK**
 ```yaml
 !svar hbConsume 
 ---
