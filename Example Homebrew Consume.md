@@ -18,7 +18,7 @@ Please use this as an example only! This is not designed to be used as is, and y
 ]
 ```
 
-**YMAL CURRENTLY DOES NOT WORK**
+**YMAL IS SUPPORTED**
 ```yaml
 !svar hbConsume 
 ---
