@@ -1,1 +1,1 @@
-TESTING 
+Please see `!consume business help` for help instead.
