@@ -3,7 +3,7 @@ multiline
 A             = &ARGS&
 a             = argparse(A)
 ch            = character()
-text          = ''' -footer "Adalbär3333 | TEST VERSION ALPHA" '''
+text          = ''' -footer "adalbar3333" '''
 returnText    = []
 c             = combat()
 baseAliasName = f'''{ctx.prefix}{ctx.alias} business'''
