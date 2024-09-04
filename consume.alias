@@ -4,11 +4,17 @@ A = &ARGS&
 a = argparse(A)
 text = ''
 ch = character()
+c = combat()
 
+using(bagLib="4119d62e-6a98-4153-bea9-0a99bb36da2c")
+
+bags = load_yaml(ch.get_cvar('bags','[]'))
 DEFAULT_coinRates = {"cp":100,"sp":10,"ep":2,"gp":1,"pp":0.1}
 coinRates = get_svar("coinRates") or get("coinRates", DEFAULT_coinRates)
 coinTypes = list(coinRates)
 coinPouchName = get_svar("coinPouchName") or get("coinPouchName","Coin Pouch")
+
+svar = load_yaml(get_svar('hbConsume', '{}'))
 
 if not A or a.get('help', a.get('?')):
 	ar,cc,cf,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",character()
@@ -23,9 +29,13 @@ if not A or a.get('help', a.get('?')):
 	
 def handle_coins(costs, ctype=coinTypes[0]):
 	bagsLoaded = load_yaml(get('bags', '[]'))
-	maybepouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'] or coinRates != DEFAULT_coinRates and [["Coin Pouch", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0}]]
+	maybepouch = False
+	for x in bagsLoaded:
+		if "coin" in str(x).lower():
+			maybepouch = True
+			break
 	if maybepouch:
-		pouch = maybepouch[0]
+		pouch = x
 		if pouch not in bagsLoaded:
 			bagsLoaded.append(pouch)
 			pouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'][0]
@@ -58,7 +68,10 @@ def handle_coins(costs, ctype=coinTypes[0]):
 	
 def get_coins():
 	bagsLoaded = load_yaml(get('bags', ''))
-	maybepouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'] or coinRates != DEFAULT_coinRates and [["Coin Pouch", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0}]]
+	maybepouch = False
+	for x in bagsLoaded:
+		if "coin" in str(x).lower():
+			maybepouch = True
 	if maybepouch:
 		pouch = maybepouch[0]
 		if pouch not in bagsLoaded:
@@ -70,17 +83,41 @@ def get_coins():
 		coins = {coin:purse[coin] for coin in coinTypes}
 	return coins
 
-drinks = load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
-svar = get_svar('hbConsume', '[]') if ctx.guild else '[]'
-if svar.startswith('[{'):
-	drinks += load_yaml(svar)
-elif len(svar) == 36:
-	drinks += load_yaml(get_gvar(svar))
-elif svar.startswith('[') and len(svar) > 2: 
-	for gvar in svar:
-		drinks += load_yaml(get_gvar(gvar))
-else: 
-	random = False
+drinks = (load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877')))
+shopConfirm = False
+if not c and ctx.guild:
+	svar = get_svar('hbConsume', '[]') if ctx.guild else False
+	hbSvar = load_yaml(get_svar('consumeSettings','{}')) if ctx.guild else False
+	if typeof(hbSvar) == "SafeDict":
+		if 'standard' in hbSvar.keys():
+			if not hbSvar['standard']:
+				drinks = []
+		if 'gvars' in hbSvar.keys():
+			for x in hbSvar['gvars']:
+				drinks += (load_yaml(get_gvar(x)))
+	if str(svar).startswith('[{'):
+		drinks += (load_yaml(svar))
+	if len(str(svar)) == 36:
+		drinks += (load_yaml(get_gvar(svar)))
+	if str(svar).startswith('[') and len(svar) > 2: 
+		for gvar in svar:
+			drinks += (load_yaml(get_gvar(gvar)))
+	if hbSvar and "gvars" in hbSvar.keys():
+		for x in hbSvar['gvars']:
+			drinks += (load_yaml(get_gvar(x)))
+if c:
+	shops = load_yaml(c.get_metadata('shopData', '[]'))
+	if typeof(shops) == "SafeDict":
+		drinks = []
+		for x in shops['gvars']:
+			drinks += (load_yaml(get_gvar(x)))
+			shopConfirm = True
+organizedDrinks = []
+for drink in drinks:
+	if drink not in organizedDrinks:
+		organizedDrinks.append(drink)
+drinks = organizedDrinks
+
 userdrink = '&1&'
 drink = None
 for x in drinks:
@@ -120,28 +157,29 @@ if any(x in &ARGS& for x in ["ignore", "-i", "free"]):
 	# String to display based on whether they are making saves or not
 	p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
 	# Clean up the coins bag to display
-	coinsDisp="\n".join([f"{coin}: {value}" for coin, value in get_coins().items()])
+	bags = load_yaml(ch.get_cvar('bags', '[]'))
+	coinsDisp = bagLib.display_coins(bags)
 
 elif a.get('order'):
 	if not any(x in &ARGS& for x in ['ignore', '-i', 'free']):
 		# Removes the indicated coin above from the bag only if there is enough coin to do so
-		error, coins = handle_coins(costs, ctype)
+		coins, error = bagLib.modify_coins(bags, ctype, costs)
 		if error:
-			coinsDisp="\n".join([f"{coin}: {value}" for coin, value in coins.items()])
+			coinsDisp=bagLib.display_coins(bags)
 
-			text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" -f "{name}'s Coins|{coinsDisp}"'''
+			text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" {coinsDisp[0]}'''
 			return text
 	coinsDisp="\n".join([f"{coin}: {value}" for coin, value in coins.items()])
-	text += f''' -title "{name} Bought A {drink["fancyName"]}{f""" for {a.last('for')}""" if a.get('for') else ''}!" -desc "{drink['desc']}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** {costs}{ctype}'}" -f "**Coins**|{coinsDisp}"'''
+	text += f''' -title "{name} Bought A {drink["fancyName"]}{f""" for {a.last('for')}""" if a.get('for') else ''}!" -desc "{drink['desc']}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** {costs}{ctype}'}" {coinsDisp[0]}'''
 	return text
 
 else:
 	# Removes the indicated coin above from the bag only if there is enough coin to do so
-	error, coins = handle_coins(costs, ctype)
+	coins, error = bagLib.modify_coins(bags, ctype, costs)
 	if error:
-		coinsDisp="\n".join([f"{coin}: {value}" for coin, value in coins.items()])
+		coinsDisp=bagLib.display_coins(bags)
 
-		text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" -f "{name}'s Coins|{coinsDisp}"'''
+		text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" {coinsDisp[0]}'''
 		return text
 
 	# Error Checking
@@ -174,8 +212,20 @@ else:
 	p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
 
 	# Clean up the coins bag to display
-	coinsDisp="\n".join([f"{coin}: {value}" for coin, value in coins.items()])
+	coinsDisp=bagLib.display_coins(bags)
+
+if shopConfirm:
+	shopProfit = load_yaml(c.get_metadata('profit'))
+	profit = bagLib.modify_coins(shopProfit,delta={ctype:-costs})
+	c.set_metadata('profit',dump_json(shopProfit))
+
 status = f' -f "{name} is Tipsy:| {name} gains advantage on all Charisma Checks, but disadvantage on all Intelligence checks. "' if ch.get_cc(cf)==1 else f'-f "{name} is drunk:| {name} is under the same effects as tipsy, but they now have advantage on all Strength checks but disadvantage on all Dexterity checks."' if ch.get_cc(cf)==2 else f'-f "{name} has Alcohol Poisioning:| {name} has disadvantage on all attack rolls and ability checks"' if ch.get_cc(cf)==3 else f'-f "{name} has Heavy Alcohol Poisioning:| {name} is still under the effect of Alcohol Poisioning, but their speed is now halved."' if ch.get_cc(cf)==4 else f'-f "{name} has blacked out drunk: | {name} is now incapacitated."' if ch.get_cc(cf)==5 else ""
-text += f''' -title "{name} consumes a {drink["fancyName"] if drink else ''}!" -desc "{(drink['desc'] if drink else '')}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** -{abs(int(costs))}{ctype}'}" -f "**Coins**|{coinsDisp}" -f "**Intoxication Factor:** +{INTOX}\n**Intoxication Points:** {ch.get_cc(cc)}\n**Drunkeness Points:** {ch.cc_str(cf)}\n{p}" {status} -color <color> -thumb <image>'''
+text += f''' -title "{name} consumes a {drink["fancyName"] if drink else ''}!" -desc "{(drink['desc'] if drink else '')}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** -{abs(int(costs))}{ctype}'}" {coinsDisp[0]} -f "**Intoxication Factor:** +{INTOX}\n**Intoxication Points:** {ch.get_cc(cc)}\n**Drunkeness Points:** {ch.cc_str(cf)}\n{p}" {status} -color <color> -thumb <image>'''
+
+if shopConfirm:
+	shopProfitDisp = """ -f "Current Profit|"""
+	for x,y in shopProfit[0][1].items():
+		shopProfitDisp += f'''{y}{x}, '''
+	text += shopProfitDisp+'"'
 return text 
 </drac2>

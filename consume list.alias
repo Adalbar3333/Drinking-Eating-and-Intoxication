@@ -3,34 +3,78 @@ embed
 A = '&ARGS&'
 a = argparse(A)
 ch = character 
-items = []
+c = combat()
+drinks = (load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877')))
 n = '\n'
-if get_svar("consumeSettings"):
-	csettings = load_yaml(get_svar("consumeSettings"))
-	if csettings.baseItems == True:
-		items = load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
-else:
-	items = load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877'))
 
-
-svar = get_svar('hbConsume', '[]') if ctx.guild else '[]'
-if svar.startswith('[{'):
-	items += load_yaml(svar)
-elif len(svar) == 36:
-	items += load_yaml(get_gvar(svar))
-elif svar.startswith('[') and len(svar) > 2: 
-	for gvar in svar:
-		items += load_yaml(get_gvar(gvar))
+shopConfirm = False
+if not c and ctx.guild:
+	svar = get_svar('hbConsume', '[]') if ctx.guild else False
+	hbSvar = load_yaml(get_svar('consumeSettings', "{}")) if ctx.guild else False
+	if typeof(hbSvar) == "SafeDict":
+		if 'standard' in hbSvar.keys():
+			if not hbSvar['standard']:
+				drinks = []
+		if 'gvars' in hbSvar.keys():
+			for x in hbSvar['gvars']:
+				drinks += (load_yaml(get_gvar(x)))
+	if str(svar).startswith('[{'):
+		drinks += (load_yaml(svar))
+	if len(str(svar)) == 36:
+		drinks += (load_yaml(get_gvar(svar)))
+	if str(svar).startswith('[') and len(svar) > 2: 
+		for gvar in svar:
+			drinks += (load_yaml(get_gvar(gvar)))
+	if hbSvar and "gvars" in hbSvar.keys():
+		for x in hbSvar['gvars']:
+			drinks += (load_yaml(get_gvar(x)))
+if c:
+	shops = load_yaml(c.get_metadata('shopData', '[]'))
+	if typeof(shops) == "SafeDict":
+		drinks = []
+		for x in shops['gvars']:
+			drinks += (load_yaml(get_gvar(x)))
+			shopConfirm = True
 
 types = []
-for item in items:
-	if not item.get('type'):
+for item in drinks:
+	if not item['type']:
 		err(f"Your HB item `{item.get('fancyName')}` does not have a `type` defined. Please fix that!")
 	if item.get('type') not in types:
 		types.append(item.get('type'))
 out = []
-for thing in types:
-	out.append(f""" -f "__{thing.title()}s__|{f'{n}'.join([f'{x.fancyName}: {abs(int(x.cost))}{x.coinType}' for x in items if thing in x.get('type')])}" """)
+outPrep = {}
+
+
+
+for x in types:
+	outPrep.update({x:[]})
+
+organizedDrinks = []
+for drink in drinks:
+	if drink not in organizedDrinks:
+		organizedDrinks.append(drink)
+drinks = organizedDrinks
+
+for x in drinks:
+	outPrep[x['type']] += [f'''{x.fancyName}: {abs(int(x.cost))}{x.coinType}''']
+
+outTextList = []
+outText = ""
+for x,y in outPrep.items():
+	outText += f''' -f "{x.title()}|'''
+	for i,z in enumerate(y):
+		if len(outText) >= 800:
+			outText += '"'
+			outTextList += [outText]
+			outText = ''' -f "'''
+		else:
+			outText += f'''{z}\n'''
+	outText += f'''"'''
+outTextList += [outText]
+
+out.append(' '.join(outTextList))
+
 
 text = f""" -title "Here Is The List of All The Available Items" """
 text += ' '.join(out)

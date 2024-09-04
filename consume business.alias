@@ -1,0 +1,101 @@
+multiline
+<drac2>
+A             = &ARGS&
+a             = argparse(A)
+ch            = character()
+text          = ''' -footer "Adalbär3333 | TEST VERSION ALPHA" '''
+returnText    = []
+c             = combat()
+baseAliasName = f'''{ctx.prefix}{ctx.alias} business'''
+INPUT         = baseAliasName+" "+" ".join(A)
+
+using(bagLib="4119d62e-6a98-4153-bea9-0a99bb36da2c")
+
+# Server Variable Refrence Sheet and Explanation
+svarYR = '''
+tax: "Initger meaning a percentage (10=10%, 50=50%). This will reduce the amount of
+  money the shop owner can collect for running their business. Decimals also work (such as 2.5). Set to 0 for no tax."
+standard: false|true - Set to false if you do not want to use the standard 
+shops:
+- owner: "The characters name|The Users ID"
+  gvars:
+  - "list of gvar id's"
+  desc: "Title of Shop|Description of the shop"
+gvars:
+- "List of GVARs - Required if there is no shop and you want homebrew items."'''
+
+# Server Variable Example
+svarYE = '''
+tax: 7
+standard: false
+shops:
+- owner: "Fredrick J Feuermacher|315697931976048640"
+  gvars:
+  - "1c350d5b-386c-46b6-bf4f-d4f4237be595"
+  desc: "Fredrick's Winery|This winery is filled with magical aura of the great sorcerer.
+      The wines are quite peculiar with their flavors being not only made from exotic
+      fruits, but also things that would otherwise be inedible."
+'''
+
+svarYR,svarYE = load_yaml(svarYR), load_yaml(svarYE)
+
+# Update text - Will become Help Text
+if a.get('?') or a.get('help') or a.get('h') or not A:
+	text += f''' -title "__Currently in Testing!!!__"'''
+	text += f''' -desc "This sub-alias is currently in the testing phases. For now, please refrain from utilizing this for now. However, for now here is what we plan to allow with this update!" '''
+	text += f''' -f "`{ctx.prefix+ctx.alias} business open`|Opens a business defined via a combanation of SVAR, GVAR and uses the initave function of the bot." '''
+	text += f''' -f "SVAR Refrence:|```yaml\n{dump_yaml(svarYR)}```" '''
+	text += f''' -f "SVAR Example:|```yaml\n{dump_yaml(svarYE)} ```\nThe SVAR will need to be named __**`consumeSettings`**__" '''
+	text += f''' -f "`{ctx.prefix+ctx.alias} business collect`|Collect the coins your shop has incrued. Tax will be applied each time you collect from your shop." '''
+	text += f''' -f "To close the shop, simply end the initiave."'''
+	return f'''{ctx.prefix}embed {text}'''
+
+# Start Init if not Init
+if not c:
+	returnText += [f'''{ctx.prefix}i begin''']
+	text += f''' -title "Inititave Begun" -desc "Run the command again to setup your shop." -f "```{INPUT}```" '''
+	returnText += [f'''{ctx.prefix}embed {text}'''] 
+	return f"\n".join(returnText)
+
+DEFAULT_coinRates = {"cp":100,"sp":10,"ep":2,"gp":1,"pp":0.1}
+coinRates = get_svar("coinRates") or get("coinRates", DEFAULT_coinRates)
+coinTypes = list(coinRates)
+coinPouchName = get_svar("coinPouchName") or get("coinPouchName","Coin Pouch")
+emptyProfit = [["Coin Pouch", {"pp":0,"gp":0,"ep":0,"sp":0,"cp":0}]]
+
+
+serverData = load_yaml(get_svar("consumeSettings",'{}'))
+if a.get('o') or a.get('open'):
+	if 'shops' in serverData.keys():
+		for shop in serverData['shops']:
+			owner,oid = shop['owner'].split('|')
+			if name == owner and oid == str(ctx.author.id) :
+				c.set_metadata('shopData',dump_json(shop))
+				c.set_metadata('profit',dump_json(emptyProfit))
+				text += f''' -title "{name} opened their shop, {shop['desc'].split('|')[0]} for Business" '''
+				text += f''' -desc "{shop['desc'].split('|')[1]}" '''
+				break
+
+shopData = load_yaml(c.get_metadata('shopData','[]'))
+if a.get('c') or a.get('collect') and len(shopProfit) != 0:
+	owner,oid = shopData['owner'].split('|')
+	if name == owner and oid == str(ctx.author.id):
+		shopProfit = load_yaml(c.get_metadata('profit','[]'))
+		replaceProfit = shopProfit
+		tax = 1-(float(serverData['tax'])/100)
+		for ct,ca in shopProfit[0][1].items():
+			replaceProfit[0][1].update({ct:(ca*tax)})
+		bags = bagLib.load_bags()
+		oldCoins = bagLib.get_coins(bags)[1].copy()
+		bagLib.modify_coins(bags, delta=replaceProfit[0][1])
+		text = f''' -title "{name} Collected Profit from `{shopData['desc'].split('|')[0]}`"'''
+		addCoin = " " + bagLib.display_coins(replaceProfit, compact=1)[0]
+		text += addCoin.replace('Coin Pouch', 'Coin Gain')
+		text += " " + bagLib.display_coins(bags, old_coins=oldCoins)[0]
+		c.set_metadata('profit',dump_json(emptyProfit))
+		bagLib.save_bags(bags)
+
+
+return F'''{ctx.prefix}embed {text}'''
+
+</drac2>

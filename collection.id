@@ -1,13 +1,14 @@
 {
-  "snippets": {}, 
-  "name": "Drinking, Eating and Intoxication (v2.2.1)", 
-  "collection": "5fe86c94032beeab196954f2", 
   "aliases": {
-    "consume list": "5feaa88aadefbcb30a943e63", 
     "consume updates": "60a3fb8398876c1310d98806", 
-    "consume catalogue": "61bf2901e39dfa3c4afa5cd2", 
+    "consume business": "66c6547dd5e6d47860f7346c", 
     "consume": "5fe86d12adefbcb30a943c22", 
+    "consume catalogue": "61bf2901e39dfa3c4afa5cd2", 
     "consume rules": "6064742f9534534aefb8f16a", 
-    "consume menu": "61fcc54910bae653597909e6"
-  }
+    "consume menu": "61fcc54910bae653597909e6", 
+    "consume list": "5feaa88aadefbcb30a943e63"
+  }, 
+  "collection": "5fe86c94032beeab196954f2", 
+  "name": "Drinking, Eating and Intoxication (v2.3)", 
+  "snippets": {}
 }
