@@ -76,6 +76,7 @@ if a.get('o') or a.get('open'):
 				text += f''' -desc "{shop['desc'].split('|')[1]}" '''
 				break
 
+shopProfit = load_yaml(c.get_metadata('profit','[]'))
 shopData = load_yaml(c.get_metadata('shopData','[]'))
 if a.get('c') or a.get('collect') and len(shopProfit) != 0:
 	owner,oid = shopData['owner'].split('|')
