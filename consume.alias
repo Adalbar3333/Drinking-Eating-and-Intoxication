@@ -87,7 +87,7 @@ drinks = (load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877')))
 shopConfirm = False
 if not c and ctx.guild:
 	svar = get_svar('hbConsume', '[]') if ctx.guild else False
-	hbSvar = load_yaml(get_svar('consumeSettings','{}')) if ctx.guild else False
+	hbSvar = svar if ctx.guild else False
 	if typeof(hbSvar) == "SafeDict":
 		if 'standard' in hbSvar.keys():
 			if not hbSvar['standard']:
