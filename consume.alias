@@ -1,22 +1,84 @@
-embed
-<drac2>
+embed <drac2>
+
 A = &ARGS&
 a = argparse(A)
 text = ''
 ch = character()
 c = combat()
+n = F"\n"
 
-using(bagLib="4119d62e-6a98-4153-bea9-0a99bb36da2c")
 
 bags = load_yaml(ch.get_cvar('bags','[]'))
-DEFAULT_coinRates = {"cp":100,"sp":10,"ep":2,"gp":1,"pp":0.1}
-coinRates = get_svar("coinRates") or get("coinRates", DEFAULT_coinRates)
-coinTypes = list(coinRates)
-coinPouchName = get_svar("coinPouchName") or get("coinPouchName","Coin Pouch")
 
-svar = load_yaml(get_svar('hbConsume', '{}'))
+version = "v4.0.0"
+footer = F""" -footer "{ctx.prefix}consume | adalbar3333 | {version}" """
 
-if not A or a.get('help', a.get('?')):
+using(consumeLib="88b9c691-7c9f-4300-a1df-ffbe1090c2ab")
+using(fcc="9bcc01fe-a881-420d-86f8-6dd4d4c3092d")
+using(bagLib="4119d62e-6a98-4153-bea9-0a99bb36da2c")
+
+forigenCoins = fcc.forigenCoins
+
+serverSettings = fcc.serverSettings
+
+getForeign = fcc.get_foreign(forigenCoins)
+
+old_coins = load_json(dump_json(fcc.get_coins(bags, getForeign)))
+
+standardDrinks = load_yaml(get_gvar("c3c5c125-2284-4793-9443-213fc9dd9877"))
+
+# Server Settings Setup
+
+svarData = load_yaml(get_svar('hbConsume',"[]"))
+
+if typeof(svarData) == "SafeDict":
+	if "custom" in svarData.keys():
+		customDrinks = svarData['custom']
+	else: 
+		customDrinks = {}
+	if "standard" in svarData.keys():
+		useStandard = svarData['standard']
+	else:
+		useStandard = False
+
+	if useStandard:
+		drinks = standardDrinks
+	else:
+		drinks = []
+	for typ, nym in customDrinks.items():
+		if typ == "gvar":
+			drinks += (load_yaml(get_gvar(nym)))
+		elif typ == "svar":
+			drinks += (load_yaml(get_svar(nym)))
+elif typeof(svarData) == "SafeList":
+	drinks = standardDrinks
+	drinks += svarData
+else:
+	drinks = standardDrinks
+
+shopConfirm = False
+if c:
+	shops = load_yaml(c.get_metadata('shopData', '[]'))
+	if typeof(shops) == "SafeDict":
+		drinks = []
+		if 'standard' in shops.keys():
+			if not shops['standard']:
+				drinks = []
+		for x in shops['gvars']:
+			drinks += (load_yaml(get_gvar(x)))
+			shopConfirm = True
+
+if not A or any(x in &ARGS& for x in ["menu", "list", "catalog"]):
+	text  = F""" -title "Need a Drink, or Something to Eat?" """
+	text += F""" -desc "__{name}__ is looking at the menu!{n}## Menu" """
+	text += F"""{consumeLib.disp_drinks(drinks)}"""
+	text += footer
+	return text
+
+
+
+
+if a.get('help', a.get('?')):
 	ar,cc,cf,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",character()
 	ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
 	text += f''' -title "Time For Some drinking and eating!"'''
@@ -24,110 +86,23 @@ if not A or a.get('help', a.get('?')):
 	text += f''' -f "**Intoxication Points:** {ch.get_cc(cc)}\n**Drunkeness Points:** {ch.cc_str(cf)}"'''
 	text += f''' -f "**Rules**|When it comes to drinking and eating, you can handle up to your `Constitution Modifier` in intoxication points. Each drink and food affects your intoxication level differently due to its alcohol content, or its absorbing traits. Type `!consume list` to see the potency of the different drinks you can use as well as their monetary cost.\nYour first drink past that limit will force you to make a `Constitution Saving Throw`, with an Initial `DC` of 10. Every drink past this one will increase the `DC` by `2`. Eg, 2nd drink means `DC 12`, 3rd means `DC 14`, etc. Food will decrease the the DC by 2. Resistance to Poison will grant you `advantage` on these saves.\nHow drunk you get depends on how poorly you fail. If you miss the DC by less than 5, you take one point of drunkenness. If you miss by greater than 5, but less than or equal to 10, you gain 2 points of drunkenness. If you fail by greater than 10, you gain 3."'''
 	text += f''' -f "__**Intoxication Levels**__" -f "Level 1: *Tipsy*|Tipsy means you gain advantage on all Charisma checks, but disadvantage on all Intelligence checks" -f "Level 2: *Drunk*|Drunk means you are under the effects of tipsy, and have advantage on all Strength attacks and checks but disadvantage on all Dexterity attacks and checks." -f "Level 3: *Alcohol Poisoning*|Alcohol Poisoning now means you have disadvantage on all attack rolls. You are no longer under the effects of Tipsy or Drunk" -f "Level 4: *Heavy Alcohol Poisoning*|Heavy Alcohol Poisoning means you are still under the effects of Alcohol Poisoning and your movement speed is now halved." -f "Level 5: *Blacked Out Drunk*|You are now Incapacitated."'''
-	text += f''' -f "Drink Responsibly!" -color <color> -thumb <image> -f "Check out `!consume updates` for updates, and you can get the `!coins` alias off the [support server](https://discord.gg/HtFqV3p7QN)." -footer "{ctx.prefix}{ctx.alias} | Adalbär#3333" -thumb "https://cdn.discordapp.com/attachments/792699041502593025/793347046333218876/beers.png"'''
+	text += f''' -f "Drink Responsibly!" -color <color> -thumb <image> -f "Check out `!consume updates` for updates, and you can get the `!coins` alias off the [support server](https://discord.gg/HtFqV3p7QN)." -f "Report a Bug? Visit the [Drinking, Eating, and Intoxication Github](https://github.com/Adalbar3333/Drinking-Eating-and-Intoxication)" -footer "{ctx.prefix}{ctx.alias} | Adalbär#3333" -thumb "https://cdn.discordapp.com/attachments/792699041502593025/793347046333218876/beers.png"'''
 	return text
-	
-def handle_coins(costs, ctype=coinTypes[0]):
-	bagsLoaded = load_yaml(get('bags', '[]'))
-	maybepouch = False
-	for x in bagsLoaded:
-		if "coin" in str(x).lower():
-			maybepouch = True
-			break
-	if maybepouch:
-		pouch = x
-		if pouch not in bagsLoaded:
-			bagsLoaded.append(pouch)
-			pouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'][0]
-		coins = pouch[1]
-		coins.update({ctype:coins[ctype]+costs})
-		
-		for coin in coinTypes[:-1]: # for each coin type except for the last one
-			larger = coinTypes[coinTypes.index(coin)+1] # get the coin type that is one larger (cp -> sp, etc)
-			rate = int(coinRates[coin]/coinRates[larger]) # find the rate between the current coin and the larger coin. (cp/sp = 100/10=10)
-			p = coins[coin]//rate # find the new value by dividing the current amount of coins by the rate
-			if coins[coin] < 0: # if our coin subtraction brought this coin type below 0 coins:
-				coins.update( # Update our coin pouch
-				{
-					larger:coins[larger]+p, # Subtract the new value to the larger coin type (since p is negative)
-					coin:coins[coin]-p*rate # Add the new value multiplied by the rate to the smaller coin type
-				} 
-				)
-		# If they dont have the coin, it errors.
-		error = any([coins[x]<0 for x in coins])
-		if not error:
-			character().set_cvar("bags",dump_json(bagsLoaded))
-		
-	else:
-		purse = character().coinpurse
-		delta = parse_coins(f"{costs}{ctype}")
-		if not (error:=-delta.total > purse.total):
-			purse.modify_coins(delta.pp, delta.gp, delta.ep, delta.sp, delta.cp)
-		coins = {coin:purse[coin] for coin in coinTypes}
-	return error, coins
-	
-def get_coins():
-	bagsLoaded = load_yaml(get('bags', ''))
-	maybepouch = False
-	for x in bagsLoaded:
-		if "coin" in str(x).lower():
-			maybepouch = True
-	if maybepouch:
-		pouch = maybepouch[0]
-		if pouch not in bagsLoaded:
-			bagsLoaded.append(pouch)
-			pouch = [i for i in bagsLoaded if i[0] == 'Coin Pouch'][0]
-		coins = pouch[1]
-	else:
-		purse = character().coinpurse
-		coins = {coin:purse[coin] for coin in coinTypes}
-	return coins
 
-drinks = (load_yaml(get_gvar('c3c5c125-2284-4793-9443-213fc9dd9877')))
-shopConfirm = False
-if not c and ctx.guild:
-	svar = get_svar('hbConsume', '[]') if ctx.guild else False
-	hbSvar = svar if ctx.guild else False
-	if typeof(hbSvar) == "SafeDict":
-		if 'standard' in hbSvar.keys():
-			if not hbSvar['standard']:
-				drinks = []
-		if 'gvars' in hbSvar.keys():
-			for x in hbSvar['gvars']:
-				drinks += (load_yaml(get_gvar(x)))
-	if str(svar).startswith('[{'):
-		drinks += (load_yaml(svar))
-	if len(str(svar)) == 36:
-		drinks += (load_yaml(get_gvar(svar)))
-	if str(svar).startswith('[') and len(svar) > 2: 
-		for gvar in svar:
-			drinks += (load_yaml(get_gvar(gvar)))
-	if hbSvar and "gvars" in hbSvar.keys():
-		for x in hbSvar['gvars']:
-			drinks += (load_yaml(get_gvar(x)))
-if c:
-	shops = load_yaml(c.get_metadata('shopData', '[]'))
-	if typeof(shops) == "SafeDict":
-		drinks = []
-		for x in shops['gvars']:
-			drinks += (load_yaml(get_gvar(x)))
-			shopConfirm = True
-organizedDrinks = []
-for drink in drinks:
-	if drink not in organizedDrinks:
-		organizedDrinks.append(drink)
-drinks = organizedDrinks
 
 userdrink = '&1&'
 drink = None
+
 for x in drinks:
 	if userdrink.lower() in x.name.lower() or userdrink.lower() in x.fancyName.lower():
 		drink = x
 		break
+
 if not drink:
-	text = f''' -title "Not In Stock-" -desc "Sorry friend, but we don't have any {userdrink.capitalize()} in stock. You can take a look at our catalog, if you'd like." -f "`{ctx.prefix}{ctx.alias} catalogue` or `{ctx.prefix}{ctx.alias} list` will allow you to look at all available drinks and food."'''
+	text = f''' -title "Not In Stock-" -desc "Sorry friend, but we don't have any {userdrink.capitalize()} in stock. You can take a look at our catalog again, if you'd like.{n}## Menu" '''
+	text += F""" {consumeLib.disp_drinks(drinks)} """
 	return text
-# Sets cost of the item to whatever the homebrew item is
+
 costs= -(abs(int(drink["cost"])) if drink else 0)
 ctype= (drink["coinType"] if drink else "")
 # Sets the intoxication factor for the homebrew item. 
@@ -135,84 +110,51 @@ INTOX= (int(drink["intox"])if drink else "")
 # Stores the arguments for later parsing, sets the name of the two CC and collects the constitutionMod
 ar,cc,cf,con,ch=argparse(&ARGS&),"Intoxication Points","Drunkeness",constitutionMod,character()
 
+## Free Drink / Don't pay
+paying = True
 if any(x in &ARGS& for x in ["ignore", "-i", "free"]):
-	# Error Checking
-	helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
-	resetOk=True if ar.get("reset") or ar.get("Reset") else False
-	# Create the CC if they didn't exist
-	ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
-	# Reset drinks if reset is sent
-	ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""
-	# Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
-	"" if helpOk or resetOk else ch.mod_cc(cc, +INTOX)
-	# Sets the value of how many drinks until it starts to make the saves
-	x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con
-	# Sets the incremental DC which is based off the amount of drinks taken minus their constitution modifier
-	dc=10+((y*2)-2)
-	# Checks if advantage, disadvantage, guidance or a bonus was added to the roll and applies appropriate dice string
-	d=vroll(f"""{["1d20", "2d20kh1", "2d20kl1"][ar.adv()]}+{str(constitutionSave)}{f"+{ar.join('b', '+')}" if ar.get("b") else ""}{"+1d4" if ar.get("guidance") else ""}""")
-	# Increase drunkeness if DC is not met.
-	dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0
-	ch.mod_cc(cf,+dr)
-	# String to display based on whether they are making saves or not
-	p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
-	# Clean up the coins bag to display
-	bags = load_yaml(ch.get_cvar('bags', '[]'))
-	coinsDisp = bagLib.display_coins(bags)
+	paying = False
 
-elif a.get('order'):
-	if not any(x in &ARGS& for x in ['ignore', '-i', 'free']):
-		# Removes the indicated coin above from the bag only if there is enough coin to do so
-		coins, error = bagLib.modify_coins(bags, ctype, costs)
-		if error:
-			coinsDisp=bagLib.display_coins(bags)
-
-			text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" {coinsDisp[0]}'''
-			return text
-	coinsDisp="\n".join([f"{coin}: {value}" for coin, value in coins.items()])
-	text += f''' -title "{name} Bought A {drink["fancyName"]}{f""" for {a.last('for')}""" if a.get('for') else ''}!" -desc "{drink['desc']}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** {costs}{ctype}'}" {coinsDisp[0]}'''
-	return text
-
-else:
-	# Removes the indicated coin above from the bag only if there is enough coin to do so
-	coins, error = bagLib.modify_coins(bags, ctype, costs)
-	if error:
-		coinsDisp=bagLib.display_coins(bags)
-
-		text = f''' -title "Lacking Funds!" -desc "Sorry {name}, but you do not have enough coin to purchase a {drink.fancyName}!" {coinsDisp[0]}'''
+paid = False
+if paying:
+	modCoins,coinErr = fcc.modify_coins(bags,getForeign, serverSettings,ctype, costs)
+	if coinErr:
+		text = F""" -title "Not Enough Coin" -desc "Sorry {name}, but you do not have enough coin for a {drink['fancyName']}! They cost `{costs}{ctype}`." """
+		text += fcc.display_coins([old_coins],gotForeign=getForeign, settings=serverSettings)[0]
 		return text
+	else:
+		paid = True
 
-	# Error Checking
+fCoins = None
+for fCoins in forigenCoins:
+    if fCoins[0] == "currentCoins":
+        fCoins = fCoins[1]
+        break
+
+if paid:
+	country = None
+	for i,country in enumerate(forigenCoins):
+		if country[0] == fCoins:
+			break
+	forigenCoins[i][1] = modCoins[1]
+	ch.set_cvar("forigenCoins",forigenCoins)
+	bagLib.save_bags(bags,coinErr)
+	coinsDisp = fcc.display_coins([modCoins], [old_coins], gotForeign=getForeign, settings=serverSettings)[0]
+	if a.get('order'):
+		text += f''' -title "{name} Bought A {drink["fancyName"]}{f""" for {a.last('for')}""" if a.get('for') else ''}!" -desc "{drink['desc']}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** {costs}{ctype}'}" {coinsDisp[0]}'''
+		return text
+	# Making Drunkness Save and Applying it
 	helpOk=True if ar.get("help") or ar.get("Help") or ar.get("?") else False
 	resetOk=True if ar.get("reset") or ar.get("Reset") else False
-
-	# Create the CC if they didn't exist
 	ch.create_cc_nx(cc,0,15,'long',reset_to=0),ch.create_cc_nx(cf,0,5,'long','bubble',reset_to=0)
-
-	# Reset drinks if reset is sent
 	ch.set_cc(cc,0) if resetOk else "",ch.set_cc(cf,0) if resetOk else ""
-
-	# Increases drinks taken if the player hasn't asked to reset or is looking up helpOk
 	"" if helpOk or resetOk else ch.mod_cc(cc, +INTOX)
-
-	# Sets the value of how many drinks until it starts to make the saves
 	x,y=con-ch.get_cc(cc),ch.get_cc(cc)-con
-
-	# Sets the incremental DC which is based off the amount of drinks taken minus their constitution modifier
 	dc=10+((y*2)-2)
-
-	# Checks if advantage, disadvantage, guidance or a bonus was added to the roll and applies appropriate dice string
 	d=vroll(f"""{["1d20", "2d20kh1", "2d20kl1"][ar.adv()]}+{str(constitutionSave)}{f"+{ar.join('b', '+')}" if ar.get("b") else ""}{"+1d4" if ar.get("guidance") else ""}""")
-
-	# Increase drunkeness if DC is not met.
 	dr=0 if d.total>=dc else 1 if d.total>=dc-5 else 2 if d.total>=dc-10 else 3 if d.total<dc-10 else 0
 	ch.mod_cc(cf,+dr)
-
-	# String to display based on whether they are making saves or not
 	p="**Intoxication Points Before Saves:** "+str(x) if x>=0 else "**Constitution Save DC: "+str(dc)+"**  "+str(d)
-
-	# Clean up the coins bag to display
-	coinsDisp=bagLib.display_coins(bags)
 
 if shopConfirm:
 	shopProfit = load_yaml(c.get_metadata('profit'))
@@ -220,12 +162,16 @@ if shopConfirm:
 	c.set_metadata('profit',dump_json(shopProfit))
 
 status = f' -f "{name} is Tipsy:| {name} gains advantage on all Charisma Checks, but disadvantage on all Intelligence checks. "' if ch.get_cc(cf)==1 else f'-f "{name} is drunk:| {name} is under the same effects as tipsy, but they now have advantage on all Strength checks but disadvantage on all Dexterity checks."' if ch.get_cc(cf)==2 else f'-f "{name} has Alcohol Poisioning:| {name} has disadvantage on all attack rolls and ability checks"' if ch.get_cc(cf)==3 else f'-f "{name} has Heavy Alcohol Poisioning:| {name} is still under the effect of Alcohol Poisioning, but their speed is now halved."' if ch.get_cc(cf)==4 else f'-f "{name} has blacked out drunk: | {name} is now incapacitated."' if ch.get_cc(cf)==5 else ""
-text += f''' -title "{name} consumes a {drink["fancyName"] if drink else ''}!" -desc "{(drink['desc'] if drink else '')}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** -{abs(int(costs))}{ctype}'}" {coinsDisp[0]} -f "**Intoxication Factor:** +{INTOX}\n**Intoxication Points:** {ch.get_cc(cc)}\n**Drunkeness Points:** {ch.cc_str(cf)}\n{p}" {status} -color <color> -thumb <image>'''
+text += f''' -title "{name} consumes a {drink["fancyName"] if drink else ''}!" -desc "{(drink['desc'] if drink else '')}" -f "{'**Costs:** Free!' if any(x in &ARGS& for x in ['ignore', '-i', 'free']) else f'**Costs:** -{abs(int(costs))}{ctype}'}" {coinsDisp} -f "**Intoxication Factor:** +{INTOX}\n**Intoxication Points:** {ch.get_cc(cc)}\n**Drunkeness Points:** {ch.cc_str(cf)}\n{p}" {status} -color <color> -thumb <image>'''
 
 if shopConfirm:
 	shopProfitDisp = """ -f "Current Profit|"""
 	for x,y in shopProfit[0][1].items():
 		shopProfitDisp += f'''{y}{x}, '''
 	text += shopProfitDisp+'"'
+
+
+
 return text 
 </drac2>
+

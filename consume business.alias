@@ -45,7 +45,7 @@ if a.get('?') or a.get('help') or a.get('h') or not A:
 	text += f''' -desc "This sub-alias is currently in the testing phases. For now, please refrain from utilizing this for now. However, for now here is what we plan to allow with this update!" '''
 	text += f''' -f "`{ctx.prefix+ctx.alias} business open`|Opens a business defined via a combanation of SVAR, GVAR and uses the initave function of the bot." '''
 	text += f''' -f "SVAR Refrence:|```yaml\n{dump_yaml(svarYR)}```" '''
-	text += f''' -f "SVAR Example:|```yaml\n{dump_yaml(svarYE)} ```\nThe SVAR will need to be named __**`consumeSettings`**__" '''
+	text += f''' -f "SVAR Example:|```yaml\n{dump_yaml(svarYE)} ```\nThe SVAR data can be appended to the __**`hbConsume`**__ SVAR following the new style. '''
 	text += f''' -f "`{ctx.prefix+ctx.alias} business collect`|Collect the coins your shop has incrued. Tax will be applied each time you collect from your shop." '''
 	text += f''' -f "To close the shop, simply end the initiave."'''
 	return f'''{ctx.prefix}embed {text}'''
@@ -64,7 +64,8 @@ coinPouchName = get_svar("coinPouchName") or get("coinPouchName","Coin Pouch")
 emptyProfit = [["Coin Pouch", {"pp":0,"gp":0,"ep":0,"sp":0,"cp":0}]]
 
 
-serverData = load_yaml(get_svar("consumeSettings",'{}'))
+serverData = load_yaml(get_svar("hbConsume",'{}'))
+serverData.update(load_yaml(get_svar("consumeSettings","{}")))
 if a.get('o') or a.get('open'):
 	if 'shops' in serverData.keys():
 		for shop in serverData['shops']:
